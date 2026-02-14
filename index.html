@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#1f8fd6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>Pixel Claw Fun</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="game-container" aria-label="3D claw machine game area"></div>
+
+      <div id="hud-top" class="hud-row">
+        <button id="menu-btn" class="hud-btn" type="button">Menu</button>
+        <button id="collection-btn" class="hud-btn" type="button">Collection</button>
+        <button id="settings-btn" class="hud-btn" type="button">Settings</button>
+      </div>
+
+      <div id="learn-prompt" class="prompt" hidden></div>
+      <div id="result-banner" class="result" hidden></div>
+      <div id="caption-box" class="caption" aria-live="polite"></div>
+
+      <div id="controls" class="controls" role="group" aria-label="Game controls">
+        <button class="control-btn" data-action="move" data-dir="forward" type="button">Forward</button>
+        <div class="control-row">
+          <button class="control-btn" data-action="move" data-dir="left" type="button">Left</button>
+          <button class="control-btn" data-action="drop" type="button">Drop</button>
+          <button class="control-btn" data-action="move" data-dir="right" type="button">Right</button>
+        </div>
+        <div class="control-row">
+          <button class="control-btn" data-action="move" data-dir="back" type="button">Back</button>
+          <button class="control-btn" data-action="autoplay" type="button">Auto Play</button>
+        </div>
+      </div>
+
+      <div id="menu-overlay" class="overlay">
+        <div class="panel menu-panel">
+          <h1>Pixel Claw Fun</h1>
+          <p class="subhead">Friendly claw machine for ages 4-7</p>
+          <label class="toggle-line" for="menu-learn-mode">
+            <input id="menu-learn-mode" type="checkbox" />
+            Learn Mode
+          </label>
+          <button id="start-game" class="primary-btn" type="button">Start Game</button>
+          <button id="menu-open-collection" class="secondary-btn" type="button">Collection Shelf</button>
+          <button id="menu-open-settings" class="secondary-btn" type="button">Settings</button>
+        </div>
+      </div>
+
+      <div id="settings-panel" class="overlay" hidden>
+        <div class="panel settings-panel">
+          <h2>Settings</h2>
+          <label class="toggle-line" for="pixelation-toggle"><input id="pixelation-toggle" type="checkbox" /> Pixelation</label>
+          <label class="toggle-line" for="shadows-toggle"><input id="shadows-toggle" type="checkbox" /> Shadows (optional)</label>
+          <label class="toggle-line" for="captions-toggle"><input id="captions-toggle" type="checkbox" /> Captions</label>
+          <label class="toggle-line" for="speech-toggle"><input id="speech-toggle" type="checkbox" /> Speech</label>
+          <label class="field-line" for="speech-rate">Speech Speed
+            <select id="speech-rate">
+              <option value="slow">Slow</option>
+              <option value="normal">Normal</option>
+            </select>
+          </label>
+          <label class="field-line" for="zoom-slider">Zoom
+            <input id="zoom-slider" type="range" min="0.8" max="1.4" step="0.05" />
+          </label>
+          <label class="toggle-line" for="music-toggle"><input id="music-toggle" type="checkbox" /> Music</label>
+          <label class="field-line" for="music-volume">Music Volume
+            <input id="music-volume" type="range" min="0" max="1" step="0.01" />
+          </label>
+          <label class="toggle-line" for="sfx-toggle"><input id="sfx-toggle" type="checkbox" /> Sound Effects</label>
+          <label class="field-line" for="sfx-volume">SFX Volume
+            <input id="sfx-volume" type="range" min="0" max="1" step="0.01" />
+          </label>
+          <button id="close-settings" class="secondary-btn" type="button">Close</button>
+        </div>
+      </div>
+
+      <div id="collection-panel" class="overlay" hidden>
+        <div class="panel collection-panel">
+          <h2>Collection Shelf</h2>
+          <div id="collection-grid" class="collection-grid"></div>
+          <div id="collection-preview" class="collection-preview">Tap a toy card to preview and hear the word.</div>
+          <button id="close-collection" class="secondary-btn" type="button">Close</button>
+        </div>
+      </div>
+
+      <div id="audio-overlay" class="overlay audio-overlay">
+        <div class="panel audio-panel">
+          <h2>Sound Setup</h2>
+          <p>Tap to enable sound on iPad.</p>
+          <button id="enable-audio" class="primary-btn" type="button">Tap to enable sound</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
