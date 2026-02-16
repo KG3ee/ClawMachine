@@ -149,35 +149,103 @@ body {
   transform: translateX(-50%);
   z-index: 15;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  width: min(96vw, 660px);
-}
-
-.control-row {
-  display: flex;
+  align-items: flex-end;
   justify-content: center;
-  gap: 10px;
-  width: 100%;
+  gap: 14px;
+  width: min(96vw, 760px);
 }
 
-.control-btn {
-  flex: 1;
+.controls.disabled {
+  opacity: 0.8;
+}
+
+.joystick-area {
+  width: 172px;
+  height: 172px;
+  position: relative;
+  border-radius: 50%;
+  border: 3px solid #fdf5d2;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 245, 198, 0.92), rgba(255, 214, 107, 0.95));
+  box-shadow:
+    inset 0 10px 18px rgba(255, 255, 255, 0.4),
+    0 8px 0 #c58f32,
+    0 12px 20px rgba(0, 0, 0, 0.25);
+  touch-action: none;
+}
+
+.joystick-area.active {
+  border-color: #ffffff;
+  box-shadow:
+    inset 0 10px 18px rgba(255, 255, 255, 0.45),
+    0 5px 0 #c58f32,
+    0 8px 16px rgba(0, 0, 0, 0.26);
+}
+
+.joystick-ring {
+  position: absolute;
+  inset: 16px;
+  border: 2px dashed rgba(20, 85, 121, 0.65);
+  border-radius: 50%;
+}
+
+.joystick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid #fefefe;
+  background: linear-gradient(180deg, #79dbff, #2eaee8);
+  box-shadow:
+    inset 0 10px 14px rgba(255, 255, 255, 0.42),
+    0 5px 0 #1e6d91;
+  transform: translate(-50%, -50%);
+  transition: transform 0.06s linear;
+}
+
+.action-stack {
+  width: min(56vw, 320px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.drop-btn,
+.auto-btn {
+  width: 100%;
   min-height: 56px;
   border: 2px solid #23506f;
   border-radius: 14px;
-  background: linear-gradient(180deg, #fff7d4, #ffd36f 55%, #ffc25d);
   color: #174563;
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 22px;
+  font-weight: 900;
   touch-action: manipulation;
   box-shadow: 0 4px 0 #ca8f31;
 }
 
-.control-btn:active {
+.drop-btn {
+  background: linear-gradient(180deg, #fff3b8, #ffc953 56%, #ffba34);
+}
+
+.auto-btn {
+  background: linear-gradient(180deg, #dbf6ff, #8bdefe 56%, #5bc5ee);
+}
+
+.drop-btn:active,
+.auto-btn:active {
   transform: translateY(1px);
   box-shadow: 0 2px 0 #ca8f31;
+}
+
+.control-hint {
+  background: rgba(8, 54, 84, 0.86);
+  border: 2px solid #fff8cf;
+  border-radius: 10px;
+  padding: 8px 10px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .overlay {
@@ -335,11 +403,23 @@ body {
   }
 
   .controls {
-    width: min(98vw, 540px);
+    width: min(98vw, 620px);
+    gap: 10px;
   }
 
-  .control-btn {
-    font-size: 18px;
+  .joystick-area {
+    width: 146px;
+    height: 146px;
+  }
+
+  .joystick-knob {
+    width: 62px;
+    height: 62px;
+  }
+
+  .drop-btn,
+  .auto-btn {
+    font-size: 19px;
   }
 
   .caption {

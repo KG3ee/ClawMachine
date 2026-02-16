@@ -24,15 +24,14 @@
       <div id="caption-box" class="caption" aria-live="polite"></div>
 
       <div id="controls" class="controls" role="group" aria-label="Game controls">
-        <button class="control-btn" data-action="move" data-dir="forward" type="button">Forward</button>
-        <div class="control-row">
-          <button class="control-btn" data-action="move" data-dir="left" type="button">Left</button>
-          <button class="control-btn" data-action="drop" type="button">Drop</button>
-          <button class="control-btn" data-action="move" data-dir="right" type="button">Right</button>
+        <div id="joystick-area" class="joystick-area" aria-label="Move claw joystick" aria-disabled="true">
+          <div class="joystick-ring"></div>
+          <div id="joystick-knob" class="joystick-knob"></div>
         </div>
-        <div class="control-row">
-          <button class="control-btn" data-action="move" data-dir="back" type="button">Back</button>
-          <button class="control-btn" data-action="autoplay" type="button">Auto Play</button>
+        <div class="action-stack">
+          <button id="drop-btn" class="drop-btn" type="button">Drop Claw</button>
+          <button id="autoplay-btn" class="auto-btn" type="button">Auto Play</button>
+          <div class="control-hint">PC: WASD or Arrows + Space</div>
         </div>
       </div>
 

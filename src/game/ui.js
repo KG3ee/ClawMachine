@@ -18,13 +18,34 @@ function normalizeToyName(name) {
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
+function toDirectionFromKey(rawKey) {
+  const key = rawKey.toLowerCase();
+  if (key === 'arrowleft' || key === 'a') {
+    return 'left';
+  }
+  if (key === 'arrowright' || key === 'd') {
+    return 'right';
+  }
+  if (key === 'arrowup' || key === 'w') {
+    return 'forward';
+  }
+  if (key === 'arrowdown' || key === 's') {
+    return 'back';
+  }
+  return null;
+}
+
 export function createUI({ initialSettings, initialCollection, icons }) {
   const listeners = new Map();
 
   const app = document.querySelector('#app');
   const gameContainer = document.querySelector('#game-container');
   const controls = document.querySelector('#controls');
-  const controlButtons = [...document.querySelectorAll('#controls .control-btn')];
+  const joystickArea = document.querySelector('#joystick-area');
+  const joystickKnob = document.querySelector('#joystick-knob');
+  const dropButton = document.querySelector('#drop-btn');
+  const autoplayButton = document.querySelector('#autoplay-btn');
+  const controlButtons = [dropButton, autoplayButton];
 
   const menuOverlay = document.querySelector('#menu-overlay');
   const menuLearnMode = document.querySelector('#menu-learn-mode');
@@ -60,6 +81,18 @@ export function createUI({ initialSettings, initialCollection, icons }) {
   let resultTimer = null;
   let captionTimer = null;
 
+  let controlsEnabled = false;
+  let moveRepeatTimer = null;
+  let repeatDirection = null;
+
+  let joystickDirection = null;
+  let joystickActive = false;
+  let joystickPointerId = null;
+
+  let keyboardDirection = null;
+  const pressedDirections = new Set();
+  let lastPressedDirection = null;
+
   function emit(event, payload) {
     const callbacks = listeners.get(event);
     if (!callbacks) {
@@ -94,11 +127,139 @@ export function createUI({ initialSettings, initialCollection, icons }) {
     audioOverlay.hidden = !visible;
   }
 
+  function getJoystickMetrics() {
+    const rect = joystickArea.getBoundingClientRect();
+    return {
+      centerX: rect.left + rect.width / 2,
+      centerY: rect.top + rect.height / 2,
+      radius: Math.min(rect.width, rect.height) * 0.34
+    };
+  }
+
+  function setKnobOffset(x, y) {
+    joystickKnob.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+  }
+
+  function resetKnob() {
+    joystickKnob.style.transform = 'translate(-50%, -50%)';
+  }
+
+  function setKnobFromDirection(direction) {
+    if (!direction) {
+      resetKnob();
+      return;
+    }
+
+    const { radius } = getJoystickMetrics();
+    const pull = radius * 0.72;
+
+    if (direction === 'left') {
+      setKnobOffset(-pull, 0);
+    } else if (direction === 'right') {
+      setKnobOffset(pull, 0);
+    } else if (direction === 'forward') {
+      setKnobOffset(0, -pull);
+    } else if (direction === 'back') {
+      setKnobOffset(0, pull);
+    }
+  }
+
+  function directionFromVector(x, y, deadZone) {
+    const distance = Math.hypot(x, y);
+    if (distance < deadZone) {
+      return null;
+    }
+
+    if (Math.abs(x) > Math.abs(y)) {
+      return x > 0 ? 'right' : 'left';
+    }
+
+    return y > 0 ? 'back' : 'forward';
+  }
+
+  function stopMoveRepeat() {
+    if (moveRepeatTimer) {
+      window.clearInterval(moveRepeatTimer);
+      moveRepeatTimer = null;
+    }
+    repeatDirection = null;
+  }
+
+  function setRepeatDirection(direction) {
+    if (direction === repeatDirection) {
+      return;
+    }
+
+    stopMoveRepeat();
+
+    if (!direction || !controlsEnabled) {
+      return;
+    }
+
+    repeatDirection = direction;
+    emit('move', repeatDirection);
+    moveRepeatTimer = window.setInterval(() => {
+      if (!controlsEnabled || !repeatDirection) {
+        return;
+      }
+      emit('move', repeatDirection);
+    }, 195);
+  }
+
+  function refreshMovementDirection() {
+    const direction = joystickDirection || keyboardDirection;
+    setRepeatDirection(direction);
+
+    if (!joystickActive) {
+      setKnobFromDirection(direction);
+    }
+  }
+
+  function endJoystickInteraction() {
+    joystickActive = false;
+    joystickPointerId = null;
+    joystickDirection = null;
+    joystickArea.classList.remove('active');
+    refreshMovementDirection();
+  }
+
+  function updateJoystickFromPoint(clientX, clientY) {
+    const { centerX, centerY, radius } = getJoystickMetrics();
+    let dx = clientX - centerX;
+    let dy = clientY - centerY;
+
+    const distance = Math.hypot(dx, dy);
+    if (distance > radius) {
+      const scale = radius / distance;
+      dx *= scale;
+      dy *= scale;
+    }
+
+    setKnobOffset(dx, dy);
+    joystickDirection = directionFromVector(dx, dy, radius * 0.26);
+    refreshMovementDirection();
+  }
+
   function setControlsEnabled(enabled) {
+    controlsEnabled = Boolean(enabled);
+    controls.classList.toggle('disabled', !controlsEnabled);
+
     controlButtons.forEach((button) => {
-      button.disabled = !enabled;
-      button.style.opacity = enabled ? '1' : '0.55';
+      button.disabled = !controlsEnabled;
+      button.style.opacity = controlsEnabled ? '1' : '0.55';
     });
+
+    joystickArea.setAttribute('aria-disabled', String(!controlsEnabled));
+
+    if (!controlsEnabled) {
+      keyboardDirection = null;
+      joystickDirection = null;
+      pressedDirections.clear();
+      lastPressedDirection = null;
+      stopMoveRepeat();
+      joystickArea.classList.remove('active');
+      resetKnob();
+    }
   }
 
   function showLearnPrompt(text, visible) {
@@ -181,17 +342,132 @@ export function createUI({ initialSettings, initialCollection, icons }) {
     setCaptionsVisible(Boolean(settings.captions));
   }
 
-  document.querySelectorAll('#controls .control-btn').forEach((button) => {
-    bindTap(button, () => {
-      const action = button.dataset.action;
-      if (action === 'move') {
-        emit('move', button.dataset.dir);
-      } else if (action === 'drop') {
-        emit('drop');
-      } else if (action === 'autoplay') {
-        emit('autoplay');
+  if ('PointerEvent' in window) {
+    joystickArea.addEventListener('pointerdown', (event) => {
+      if (!controlsEnabled) {
+        return;
       }
+
+      event.preventDefault();
+      joystickActive = true;
+      joystickPointerId = event.pointerId;
+      joystickArea.classList.add('active');
+      joystickArea.setPointerCapture(event.pointerId);
+      updateJoystickFromPoint(event.clientX, event.clientY);
     });
+
+    joystickArea.addEventListener('pointermove', (event) => {
+      if (!joystickActive || event.pointerId !== joystickPointerId) {
+        return;
+      }
+
+      event.preventDefault();
+      updateJoystickFromPoint(event.clientX, event.clientY);
+    });
+
+    const stopPointer = (event) => {
+      if (event.pointerId !== joystickPointerId) {
+        return;
+      }
+      event.preventDefault();
+      endJoystickInteraction();
+    };
+
+    joystickArea.addEventListener('pointerup', stopPointer);
+    joystickArea.addEventListener('pointercancel', stopPointer);
+    joystickArea.addEventListener('lostpointercapture', stopPointer);
+  } else {
+    let mouseActive = false;
+
+    joystickArea.addEventListener('mousedown', (event) => {
+      if (!controlsEnabled) {
+        return;
+      }
+
+      event.preventDefault();
+      joystickActive = true;
+      mouseActive = true;
+      joystickArea.classList.add('active');
+      updateJoystickFromPoint(event.clientX, event.clientY);
+    });
+
+    window.addEventListener('mousemove', (event) => {
+      if (!mouseActive || !joystickActive) {
+        return;
+      }
+      event.preventDefault();
+      updateJoystickFromPoint(event.clientX, event.clientY);
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!mouseActive) {
+        return;
+      }
+      mouseActive = false;
+      endJoystickInteraction();
+    });
+
+    joystickArea.addEventListener(
+      'touchstart',
+      (event) => {
+        if (!controlsEnabled || !event.touches.length) {
+          return;
+        }
+
+        event.preventDefault();
+        joystickActive = true;
+        joystickArea.classList.add('active');
+        const touch = event.touches[0];
+        updateJoystickFromPoint(touch.clientX, touch.clientY);
+      },
+      { passive: false }
+    );
+
+    joystickArea.addEventListener(
+      'touchmove',
+      (event) => {
+        if (!joystickActive || !event.touches.length) {
+          return;
+        }
+
+        event.preventDefault();
+        const touch = event.touches[0];
+        updateJoystickFromPoint(touch.clientX, touch.clientY);
+      },
+      { passive: false }
+    );
+
+    joystickArea.addEventListener(
+      'touchend',
+      (event) => {
+        event.preventDefault();
+        endJoystickInteraction();
+      },
+      { passive: false }
+    );
+
+    joystickArea.addEventListener(
+      'touchcancel',
+      (event) => {
+        event.preventDefault();
+        endJoystickInteraction();
+      },
+      { passive: false }
+    );
+  }
+
+  bindTap(dropButton, () => {
+    if (!controlsEnabled) {
+      return;
+    }
+    emit('drop');
+  });
+
+  bindTap(autoplayButton, () => {
+    if (!controlsEnabled) {
+      return;
+    }
+    emit('autoplay');
   });
 
   bindTap(document.querySelector('#start-game'), () => {
@@ -234,23 +510,57 @@ export function createUI({ initialSettings, initialCollection, icons }) {
       return;
     }
 
-    const key = event.key.toLowerCase();
-    if (key === 'arrowleft' || key === 'a') {
+    const direction = toDirectionFromKey(event.key);
+    if (direction) {
       event.preventDefault();
-      emit('move', 'left');
-    } else if (key === 'arrowright' || key === 'd') {
-      event.preventDefault();
-      emit('move', 'right');
-    } else if (key === 'arrowup' || key === 'w') {
-      event.preventDefault();
-      emit('move', 'forward');
-    } else if (key === 'arrowdown' || key === 's') {
-      event.preventDefault();
-      emit('move', 'back');
-    } else if (key === ' ') {
-      event.preventDefault();
-      emit('drop');
+      if (!controlsEnabled) {
+        return;
+      }
+
+      pressedDirections.add(direction);
+      lastPressedDirection = direction;
+      keyboardDirection = direction;
+      refreshMovementDirection();
+      return;
     }
+
+    if (event.code === 'Space') {
+      event.preventDefault();
+      if (controlsEnabled && !event.repeat) {
+        emit('drop');
+      }
+    }
+  });
+
+  window.addEventListener('keyup', (event) => {
+    const direction = toDirectionFromKey(event.key);
+    if (!direction) {
+      return;
+    }
+
+    event.preventDefault();
+    pressedDirections.delete(direction);
+
+    if (lastPressedDirection === direction) {
+      lastPressedDirection = null;
+    }
+
+    if (lastPressedDirection && pressedDirections.has(lastPressedDirection)) {
+      keyboardDirection = lastPressedDirection;
+    } else {
+      const remaining = [...pressedDirections];
+      keyboardDirection = remaining.length ? remaining[remaining.length - 1] : null;
+      lastPressedDirection = keyboardDirection;
+    }
+
+    refreshMovementDirection();
+  });
+
+  window.addEventListener('blur', () => {
+    keyboardDirection = null;
+    lastPressedDirection = null;
+    pressedDirections.clear();
+    refreshMovementDirection();
   });
 
   gameContainer.addEventListener(
