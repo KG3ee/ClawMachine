@@ -13,6 +13,35 @@ export const GRID = Object.freeze({
   chuteZ: 3
 });
 
+function createFloorTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#f6f4db';
+  ctx.fillRect(0, 0, 64, 64);
+
+  const colors = ['#ff9ecf', '#8bdcff', '#ffe16f', '#89f09b', '#b2a7ff'];
+  for (let y = 0; y < 64; y += 8) {
+    for (let x = 0; x < 64; x += 8) {
+      ctx.fillStyle = colors[(x / 8 + y / 8) % colors.length];
+      ctx.fillRect(x + 1, y + 1, 3, 3);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x + 4, y + 4, 2, 2);
+    }
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(2.5, 2.5);
+  texture.magFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.NearestFilter;
+  return texture;
+}
+
 function makeMachineBody() {
   const machine = new THREE.Group();
   const width = (GRID.maxX - GRID.minX + 1) * GRID.tileSize + 2.4;
@@ -20,7 +49,7 @@ function makeMachineBody() {
 
   const base = new THREE.Mesh(
     new THREE.BoxGeometry(width, 1, depth),
-    new THREE.MeshStandardMaterial({ color: 0x2f88c6, roughness: 0.68, metalness: 0.1 })
+    new THREE.MeshStandardMaterial({ color: 0x2b88d9, roughness: 0.62, metalness: 0.14 })
   );
   base.position.y = -0.5;
   base.receiveShadow = true;
@@ -28,7 +57,12 @@ function makeMachineBody() {
 
   const floor = new THREE.Mesh(
     new THREE.BoxGeometry(width - 1.1, 0.2, depth - 1.1),
-    new THREE.MeshStandardMaterial({ color: 0xf6f0d7, roughness: 0.95, metalness: 0 })
+    new THREE.MeshStandardMaterial({
+      map: createFloorTexture(),
+      color: 0xffffff,
+      roughness: 0.88,
+      metalness: 0
+    })
   );
   floor.position.y = 0.05;
   floor.receiveShadow = true;
@@ -62,10 +96,26 @@ function makeMachineBody() {
 
   const topFrame = new THREE.Mesh(
     new THREE.BoxGeometry(width, 0.45, depth),
-    new THREE.MeshStandardMaterial({ color: 0x165b8d, roughness: 0.72, metalness: 0.12 })
+    new THREE.MeshStandardMaterial({ color: 0xff6fb1, roughness: 0.56, metalness: 0.14 })
   );
   topFrame.position.y = GRID.topY + 0.3;
   machine.add(topFrame);
+
+  const rainbowRail = new THREE.Mesh(
+    new THREE.BoxGeometry(width - 0.4, 0.12, 0.32),
+    new THREE.MeshStandardMaterial({ color: 0x3dd5ff, emissive: 0x204666, emissiveIntensity: 0.4, roughness: 0.34, metalness: 0.2 })
+  );
+  rainbowRail.position.set(0, GRID.topY + 0.56, depth / 2 - 0.5);
+  machine.add(rainbowRail);
+
+  const sideStripeMaterial = new THREE.MeshStandardMaterial({ color: 0x75f3a0, roughness: 0.55, metalness: 0.14 });
+  const sideStripeL = new THREE.Mesh(new THREE.BoxGeometry(0.3, 4.8, 0.28), sideStripeMaterial);
+  sideStripeL.position.set(-width / 2 + 0.3, 2.4, depth / 2 - 0.6);
+  machine.add(sideStripeL);
+
+  const sideStripeR = sideStripeL.clone();
+  sideStripeR.position.x *= -1;
+  machine.add(sideStripeR);
 
   const railMaterial = new THREE.MeshStandardMaterial({ color: 0xc5ced9, roughness: 0.45, metalness: 0.55 });
   const railX = new THREE.Mesh(new THREE.BoxGeometry(width - 1.5, 0.16, 0.16), railMaterial);
@@ -78,7 +128,7 @@ function makeMachineBody() {
 
   const chute = new THREE.Mesh(
     new THREE.BoxGeometry(2.2, 1.3, 1),
-    new THREE.MeshStandardMaterial({ color: 0xf1b847, roughness: 0.72, metalness: 0.08 })
+    new THREE.MeshStandardMaterial({ color: 0xffbb5a, roughness: 0.62, metalness: 0.1 })
   );
   chute.position.set(0, 0.6, depth / 2 - 0.75);
   machine.add(chute);
@@ -90,7 +140,27 @@ function makeMachineBody() {
   chuteOpening.position.set(0, 0.8, depth / 2 - 0.47);
   machine.add(chuteOpening);
 
-  machine.userData = { width, depth };
+  const marqueeBulbs = [];
+  const bulbColors = [0xfff27c, 0x8ceaff, 0xff92cc, 0xa6ff9b];
+  const bulbGeometry = new THREE.SphereGeometry(0.12, 8, 8);
+  for (let index = 0; index < 14; index += 1) {
+    const t = index / 13;
+    const bulb = new THREE.Mesh(
+      bulbGeometry,
+      new THREE.MeshStandardMaterial({
+        color: bulbColors[index % bulbColors.length],
+        emissive: bulbColors[index % bulbColors.length],
+        emissiveIntensity: 0.85,
+        roughness: 0.22,
+        metalness: 0.12
+      })
+    );
+    bulb.position.set(-width / 2 + 0.8 + t * (width - 1.6), GRID.topY + 0.55, depth / 2 - 0.35);
+    machine.add(bulb);
+    marqueeBulbs.push(bulb);
+  }
+
+  machine.userData = { width, depth, marqueeBulbs };
 
   return machine;
 }
@@ -109,11 +179,11 @@ export function createWorld(scene, { shadows = false } = {}) {
   const clawLayer = new THREE.Group();
   root.add(clawLayer);
 
-  const ambient = new THREE.AmbientLight(0xffffff, 0.75);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.82);
   scene.add(ambient);
 
-  const keyLight = new THREE.DirectionalLight(0xffffff, 0.95);
-  keyLight.position.set(5, 9, 6);
+  const keyLight = new THREE.DirectionalLight(0xfff6e9, 1.05);
+  keyLight.position.set(5.4, 8, 6.2);
   keyLight.castShadow = Boolean(shadows);
   keyLight.shadow.mapSize.set(512, 512);
   keyLight.shadow.camera.near = 0.5;
@@ -124,9 +194,13 @@ export function createWorld(scene, { shadows = false } = {}) {
   keyLight.shadow.camera.bottom = -10;
   scene.add(keyLight);
 
-  const fillLight = new THREE.DirectionalLight(0x8acfff, 0.35);
-  fillLight.position.set(-4, 7, -5);
+  const fillLight = new THREE.DirectionalLight(0x7dcfff, 0.5);
+  fillLight.position.set(-4.8, 6.4, -5.4);
   scene.add(fillLight);
+
+  const rimLight = new THREE.DirectionalLight(0xff89c8, 0.35);
+  rimLight.position.set(0, 5.4, 7.5);
+  scene.add(rimLight);
 
   const shadowTargets = [];
 
@@ -147,6 +221,13 @@ export function createWorld(scene, { shadows = false } = {}) {
     clawLayer,
     shadowTargets,
     setShadows,
+    update(elapsed) {
+      const bulbs = machine.userData.marqueeBulbs || [];
+      bulbs.forEach((bulb, index) => {
+        const phase = elapsed * 3.4 + index * 0.45;
+        bulb.material.emissiveIntensity = 0.75 + Math.sin(phase) * 0.28;
+      });
+    },
     bounds: {
       ...GRID,
       width: machine.userData.width,

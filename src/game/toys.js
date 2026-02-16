@@ -4,13 +4,13 @@ import { GRID } from './world.js';
 const TOY_TYPES = ['bunny', 'bear', 'star', 'ball', 'car', 'cat', 'dog'];
 
 const TOY_PALETTES = {
-  bunny: ['#ffd8ea', '#ff9fc8', '#fff6fb', '#f58ab8'],
-  bear: ['#d2a679', '#9c6b3f', '#f0d6b8', '#5f4227'],
-  star: ['#ffe36c', '#ffb938', '#fff8bf', '#ff8c32'],
-  ball: ['#90d9ff', '#4fb4ff', '#e8f8ff', '#2468b4'],
-  car: ['#ff6f73', '#ffb34d', '#fcefd8', '#304359'],
-  cat: ['#f6b57c', '#f08f47', '#fff2dc', '#5d3f2a'],
-  dog: ['#c8b18f', '#9e805e', '#efe0cb', '#4b3a2a']
+  bunny: ['#ffd4f0', '#ff79bf', '#fff6fd', '#ffb8db'],
+  bear: ['#ffd39b', '#d08a4e', '#fff0d8', '#8b582f'],
+  star: ['#ffe766', '#ffbe32', '#fffcd1', '#ff8f3a'],
+  ball: ['#88dcff', '#3db6ff', '#eef8ff', '#3a68d5'],
+  car: ['#ff666f', '#ffcf4d', '#fff5de', '#355278'],
+  cat: ['#ffc08d', '#ff8f44', '#fff3e2', '#5f412c'],
+  dog: ['#d7bf9f', '#b18b60', '#f4e7d3', '#5c4630']
 };
 
 function pickRandom(items) {
@@ -84,13 +84,14 @@ function applyShadow(mesh, enabled) {
 
 function createToyMaterial(type) {
   const texture = makePixelTexture(TOY_PALETTES[type]);
+  const emissive = new THREE.Color(TOY_PALETTES[type][1]).multiplyScalar(0.35);
   return new THREE.MeshStandardMaterial({
     map: texture,
     color: 0xffffff,
-    roughness: 0.86,
+    roughness: 0.62,
     metalness: 0.06,
-    emissive: 0x222222,
-    emissiveIntensity: 0.2
+    emissive,
+    emissiveIntensity: 0.28
   });
 }
 
@@ -290,7 +291,9 @@ export class ToyManager {
       type,
       root,
       parts,
-      held: false
+      held: false,
+      baseY: 0.2 + THREE.MathUtils.randFloat(0, 0.06),
+      bobPhase: THREE.MathUtils.randFloat(0, Math.PI * 2)
     };
 
     this.nextId += 1;
@@ -411,7 +414,7 @@ export class ToyManager {
     if (this.highlightedToy && this.highlightedToy !== toy) {
       this.highlightedToy.parts.forEach((part) => {
         if (part.material && part.material.emissiveIntensity !== undefined) {
-          part.material.emissiveIntensity = 0.2;
+          part.material.emissiveIntensity = 0.28;
         }
       });
     }
@@ -424,10 +427,10 @@ export class ToyManager {
       return;
     }
 
-    const pulse = 0.45 + Math.sin(elapsed * 8) * 0.2;
+    const pulse = 0.58 + Math.sin(elapsed * 8) * 0.22;
     toy.parts.forEach((part) => {
       if (part.material && part.material.emissiveIntensity !== undefined) {
-        part.material.emissiveIntensity = 0.35 + pulse;
+        part.material.emissiveIntensity = 0.34 + pulse;
       }
     });
 
@@ -445,7 +448,7 @@ export class ToyManager {
     if (this.highlightedToy) {
       this.highlightedToy.parts.forEach((part) => {
         if (part.material && part.material.emissiveIntensity !== undefined) {
-          part.material.emissiveIntensity = 0.2;
+          part.material.emissiveIntensity = 0.28;
         }
       });
     }
@@ -453,5 +456,16 @@ export class ToyManager {
     this.highlightedToy = null;
     this.highlightRing.visible = false;
     this.highlightSprite.visible = false;
+  }
+
+  updateAnimations(elapsed) {
+    this.toys.forEach((toy) => {
+      if (toy.held) {
+        return;
+      }
+
+      toy.root.position.y = toy.baseY + Math.sin(elapsed * 1.8 + toy.bobPhase) * 0.045;
+      toy.root.rotation.y = Math.sin(elapsed * 0.75 + toy.bobPhase) * 0.08;
+    });
   }
 }

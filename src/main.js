@@ -409,6 +409,21 @@ ui.on('openMenu', () => {
   openMenuOverlay();
 });
 
+ui.on('closeMenu', () => {
+  if (roundRunning) {
+    return;
+  }
+
+  if (overlayReturnState === GAME_STATES.PLAYING) {
+    closeToReturnState();
+    return;
+  }
+
+  ui.showMenu(false);
+  setState(GAME_STATES.PLAYING);
+  refreshLearnPrompt();
+});
+
 ui.on('openSettings', () => {
   if (roundRunning) {
     return;
@@ -493,6 +508,8 @@ function frame(now) {
   elapsed += delta;
 
   claw.update(delta);
+  toyManager.updateAnimations(elapsed);
+  world.update(elapsed);
 
   const highlightToy = findHighlightToy();
   toyManager.updateHighlight(highlightToy, elapsed);

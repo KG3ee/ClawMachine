@@ -198,6 +198,9 @@ export function createUI({ initialSettings, initialCollection, icons }) {
 
   bindTap(document.querySelector('#close-settings'), () => emit('closeSettings'));
   bindTap(document.querySelector('#close-collection'), () => emit('closeCollection'));
+  bindTap(document.querySelector('#close-settings-x'), () => emit('closeSettings'));
+  bindTap(document.querySelector('#close-collection-x'), () => emit('closeCollection'));
+  bindTap(document.querySelector('#close-menu-x'), () => emit('closeMenu'));
 
   bindTap(document.querySelector('#enable-audio'), () => emit('enableAudio'));
 

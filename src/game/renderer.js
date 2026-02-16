@@ -15,17 +15,17 @@ export class GameRenderer {
     this.container = container;
     this.pixelation = Boolean(pixelation);
     this.zoom = zoom;
-    this.lowResScale = 0.42;
+    this.lowResScale = 0.52;
 
     this.scene = new THREE.Scene();
     this.scene.fog = new THREE.Fog(0xb7e5ff, 16, 30);
 
-    this.camera = new THREE.PerspectiveCamera(44, 1, 0.1, 80);
-    this.baseCameraPosition = new THREE.Vector3(0, 12, 12);
-    this.cameraLookAt = new THREE.Vector3(0, 1.2, -0.4);
+    this.camera = new THREE.PerspectiveCamera(48, 1, 0.1, 80);
+    this.baseCameraPosition = new THREE.Vector3(0, 8.8, 14.4);
+    this.cameraLookAt = new THREE.Vector3(0, 2.6, -0.3);
 
     this.renderer = new THREE.WebGLRenderer({
-      antialias: false,
+      antialias: true,
       alpha: false,
       powerPreference: 'high-performance'
     });
@@ -33,6 +33,8 @@ export class GameRenderer {
     this.renderer.shadowMap.enabled = Boolean(shadows);
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.08;
     this.renderer.setClearColor(0x8fd0ff, 1);
 
     this.container.appendChild(this.renderer.domElement);
