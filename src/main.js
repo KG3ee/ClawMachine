@@ -321,58 +321,6 @@ async function runDropSequence() {
   roundRunning = false;
 }
 
-async function runAutoPlayRound() {
-  if (!stateMachine.is(GAME_STATES.PLAYING) || roundRunning) {
-    return;
-  }
-
-  let targetToy;
-  if (settings.learnMode) {
-    targetToy = ensureLearnTarget();
-  }
-
-  if (!targetToy) {
-    const best = toyManager.findBestCandidate(claw.getWorldPosition(), 20);
-    targetToy = best?.toy || null;
-  }
-
-  if (!targetToy) {
-    return;
-  }
-
-  const { gx, gz } = toyManager.getGridForToy(targetToy);
-
-  while (stateMachine.is(GAME_STATES.PLAYING) && !roundRunning) {
-    const grid = claw.getGridPosition();
-
-    if (grid.gx === gx && grid.gz === gz) {
-      break;
-    }
-
-    if (grid.gx !== gx) {
-      const step = gx > grid.gx ? 1 : -1;
-      const moved = await claw.moveBy(step, 0, 150);
-      if (moved) {
-        audio.playMove();
-      }
-      continue;
-    }
-
-    if (grid.gz !== gz) {
-      const step = gz > grid.gz ? 1 : -1;
-      const moved = await claw.moveBy(0, step, 150);
-      if (moved) {
-        audio.playMove();
-      }
-    }
-  }
-
-  if (stateMachine.is(GAME_STATES.PLAYING)) {
-    await wait(80);
-    await runDropSequence();
-  }
-}
-
 ui.on('startGame', ({ learnMode: learnEnabled }) => {
   settings.learnMode = Boolean(learnEnabled);
   learnMode.setEnabled(settings.learnMode);
@@ -412,10 +360,6 @@ ui.on('move', async (dir) => {
 
 ui.on('drop', () => {
   void runDropSequence();
-});
-
-ui.on('autoplay', () => {
-  void runAutoPlayRound();
 });
 
 ui.on('openMenu', () => {

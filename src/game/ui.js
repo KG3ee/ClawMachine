@@ -44,8 +44,7 @@ export function createUI({ initialSettings, initialCollection, icons }) {
   const joystickArea = document.querySelector('#joystick-area');
   const joystickKnob = document.querySelector('#joystick-knob');
   const dropButton = document.querySelector('#drop-btn');
-  const autoplayButton = document.querySelector('#autoplay-btn');
-  const controlButtons = [dropButton, autoplayButton];
+  const controlButtons = [dropButton];
 
   const menuOverlay = document.querySelector('#menu-overlay');
   const menuLearnMode = document.querySelector('#menu-learn-mode');
@@ -472,13 +471,6 @@ export function createUI({ initialSettings, initialCollection, icons }) {
       return;
     }
     emit('drop');
-  });
-
-  bindTap(autoplayButton, () => {
-    if (!controlsEnabled) {
-      return;
-    }
-    emit('autoplay');
   });
 
   bindTap(document.querySelector('#start-game'), () => {
