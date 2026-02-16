@@ -102,49 +102,123 @@ function createPart(geometry, material, x, y, z, shadowEnabled) {
   return mesh;
 }
 
+function createFeatureMaterial(color, { roughness = 0.42, metalness = 0.06, emissive = 0x000000, emissiveIntensity = 0 } = {}) {
+  return new THREE.MeshStandardMaterial({
+    color,
+    roughness,
+    metalness,
+    emissive,
+    emissiveIntensity
+  });
+}
+
+function addEyes(group, shadowEnabled, { y, z, spread = 0.13, size = 0.08 }) {
+  const eyeMaterial = createFeatureMaterial(0x111111, { roughness: 0.2, metalness: 0.15 });
+  group.add(createPart(new THREE.BoxGeometry(size, size, size * 0.8), eyeMaterial, -spread, y, z, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(size, size, size * 0.8), eyeMaterial, spread, y, z, shadowEnabled));
+}
+
+function addNose(group, shadowEnabled, { x = 0, y, z, size = 0.08, color = 0xff9abb }) {
+  const noseMaterial = createFeatureMaterial(color, { roughness: 0.25, metalness: 0.08 });
+  group.add(createPart(new THREE.BoxGeometry(size, size * 0.75, size * 0.75), noseMaterial, x, y, z, shadowEnabled));
+}
+
 function buildBunny(material, shadowEnabled) {
   const group = new THREE.Group();
-  group.add(createPart(new THREE.BoxGeometry(0.9, 0.8, 0.7), material, 0, 0.45, 0, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.6, 0.55, 0.55), material, 0, 1, 0.05, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.18, 0.55, 0.18), material, -0.14, 1.45, 0, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.18, 0.55, 0.18), material, 0.14, 1.45, 0, shadowEnabled));
+  const innerEarMaterial = createFeatureMaterial(0xffb0d7);
+  const footMaterial = createFeatureMaterial(0xffe7f5);
+
+  group.add(createPart(new THREE.BoxGeometry(0.86, 0.68, 0.7), material, 0, 0.39, 0, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.64, 0.54, 0.56), material, 0, 0.92, 0.07, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.17, 0.82, 0.16), material, -0.18, 1.52, 0.06, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.17, 0.82, 0.16), material, 0.18, 1.52, 0.06, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.08, 0.62, 0.08), innerEarMaterial, -0.18, 1.52, 0.13, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.08, 0.62, 0.08), innerEarMaterial, 0.18, 1.52, 0.13, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.2, 0.18, 0.28), footMaterial, -0.17, 0.12, 0.22, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.2, 0.18, 0.28), footMaterial, 0.17, 0.12, 0.22, shadowEnabled));
+  group.add(createPart(new THREE.SphereGeometry(0.12, 8, 8), footMaterial, 0, 0.44, -0.36, shadowEnabled));
+  addEyes(group, shadowEnabled, { y: 0.98, z: 0.35, spread: 0.12, size: 0.08 });
+  addNose(group, shadowEnabled, { y: 0.85, z: 0.37, size: 0.075, color: 0xff92bf });
   return group;
 }
 
 function buildBear(material, shadowEnabled) {
   const group = new THREE.Group();
-  group.add(createPart(new THREE.BoxGeometry(0.95, 0.8, 0.8), material, 0, 0.45, 0, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.7, 0.65, 0.62), material, 0, 1.05, 0.04, shadowEnabled));
-  group.add(createPart(new THREE.SphereGeometry(0.14, 8, 8), material, -0.2, 1.36, 0, shadowEnabled));
-  group.add(createPart(new THREE.SphereGeometry(0.14, 8, 8), material, 0.2, 1.36, 0, shadowEnabled));
+  const muzzleMaterial = createFeatureMaterial(0xf8dfc6);
+  const pawMaterial = createFeatureMaterial(0xf5ddc3);
+
+  group.add(createPart(new THREE.BoxGeometry(0.94, 0.74, 0.77), material, 0, 0.41, 0, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.72, 0.62, 0.62), material, 0, 0.95, 0.05, shadowEnabled));
+  group.add(createPart(new THREE.SphereGeometry(0.15, 8, 8), material, -0.24, 1.3, 0.02, shadowEnabled));
+  group.add(createPart(new THREE.SphereGeometry(0.15, 8, 8), material, 0.24, 1.3, 0.02, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.32, 0.22, 0.24), muzzleMaterial, 0, 0.8, 0.36, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.22, 0.2, 0.24), pawMaterial, -0.2, 0.14, 0.24, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.22, 0.2, 0.24), pawMaterial, 0.2, 0.14, 0.24, shadowEnabled));
+  addEyes(group, shadowEnabled, { y: 0.99, z: 0.34, spread: 0.14, size: 0.08 });
+  addNose(group, shadowEnabled, { y: 0.78, z: 0.47, size: 0.09, color: 0x3b2a24 });
   return group;
 }
 
 function buildStar(material, shadowEnabled) {
   const group = new THREE.Group();
-  group.add(createPart(new THREE.BoxGeometry(1.1, 0.3, 0.3), material, 0, 0.58, 0, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.3, 0.3, 1.1), material, 0, 0.58, 0, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.8, 0.3, 0.3), material, 0.22, 0.58, 0.22, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.8, 0.3, 0.3), material, -0.22, 0.58, 0.22, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.8, 0.3, 0.3), material, 0.22, 0.58, -0.22, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.8, 0.3, 0.3), material, -0.22, 0.58, -0.22, shadowEnabled));
+  const pointMaterial = createFeatureMaterial(0xfff4a0, { emissive: 0xffd053, emissiveIntensity: 0.22 });
+  const cone = new THREE.ConeGeometry(0.16, 0.42, 4);
+
+  group.add(createPart(new THREE.OctahedronGeometry(0.3, 0), material, 0, 0.62, 0, shadowEnabled));
+
+  const xPos = createPart(cone, pointMaterial, 0.34, 0.62, 0, shadowEnabled);
+  xPos.rotation.z = -Math.PI / 2;
+  group.add(xPos);
+
+  const xNeg = createPart(cone, pointMaterial, -0.34, 0.62, 0, shadowEnabled);
+  xNeg.rotation.z = Math.PI / 2;
+  group.add(xNeg);
+
+  const zPos = createPart(cone, pointMaterial, 0, 0.62, 0.34, shadowEnabled);
+  zPos.rotation.x = Math.PI / 2;
+  group.add(zPos);
+
+  const zNeg = createPart(cone, pointMaterial, 0, 0.62, -0.34, shadowEnabled);
+  zNeg.rotation.x = -Math.PI / 2;
+  group.add(zNeg);
+
+  const yPos = createPart(cone, pointMaterial, 0, 0.95, 0, shadowEnabled);
+  group.add(yPos);
   return group;
 }
 
 function buildBall(material, shadowEnabled) {
   const group = new THREE.Group();
-  group.add(createPart(new THREE.SphereGeometry(0.48, 8, 8), material, 0, 0.58, 0, shadowEnabled));
+  const stripeMaterial = createFeatureMaterial(0xf6fbff, { roughness: 0.4 });
+  const bandGeometry = new THREE.TorusGeometry(0.47, 0.05, 8, 16);
+
+  group.add(createPart(new THREE.SphereGeometry(0.5, 10, 10), material, 0, 0.6, 0, shadowEnabled));
+  const bandA = createPart(bandGeometry, stripeMaterial, 0, 0.6, 0, shadowEnabled);
+  bandA.rotation.x = Math.PI / 2;
+  group.add(bandA);
+
+  const bandB = createPart(bandGeometry, stripeMaterial, 0, 0.6, 0, shadowEnabled);
+  bandB.rotation.y = Math.PI / 2;
+  group.add(bandB);
   return group;
 }
 
 function buildCar(material, shadowEnabled) {
   const group = new THREE.Group();
-  group.add(createPart(new THREE.BoxGeometry(1.1, 0.45, 0.65), material, 0, 0.48, 0, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.52, 0.32, 0.65), material, -0.08, 0.8, 0, shadowEnabled));
-  group.add(createPart(new THREE.CylinderGeometry(0.13, 0.13, 0.18, 8), material, -0.36, 0.25, -0.28, shadowEnabled));
-  group.add(createPart(new THREE.CylinderGeometry(0.13, 0.13, 0.18, 8), material, 0.36, 0.25, -0.28, shadowEnabled));
-  group.add(createPart(new THREE.CylinderGeometry(0.13, 0.13, 0.18, 8), material, -0.36, 0.25, 0.28, shadowEnabled));
-  group.add(createPart(new THREE.CylinderGeometry(0.13, 0.13, 0.18, 8), material, 0.36, 0.25, 0.28, shadowEnabled));
+  const wheelMaterial = createFeatureMaterial(0x2b2b36, { roughness: 0.34, metalness: 0.16 });
+  const windshieldMaterial = createFeatureMaterial(0xcff6ff, { roughness: 0.2, metalness: 0.12 });
+  const lightMaterial = createFeatureMaterial(0xfff49f, { emissive: 0xffe566, emissiveIntensity: 0.4, roughness: 0.22 });
+
+  group.add(createPart(new THREE.BoxGeometry(1.12, 0.32, 0.66), material, 0, 0.33, 0, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.56, 0.28, 0.56), material, -0.05, 0.62, 0, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.38, 0.14, 0.57), windshieldMaterial, 0.03, 0.66, 0, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.2, 0.1, 0.62), lightMaterial, 0.53, 0.35, 0, shadowEnabled));
+
+  const wheelGeometry = new THREE.CylinderGeometry(0.14, 0.14, 0.2, 8);
+  group.add(createPart(wheelGeometry, wheelMaterial, -0.36, 0.19, -0.29, shadowEnabled));
+  group.add(createPart(wheelGeometry, wheelMaterial, 0.36, 0.19, -0.29, shadowEnabled));
+  group.add(createPart(wheelGeometry, wheelMaterial, -0.36, 0.19, 0.29, shadowEnabled));
+  group.add(createPart(wheelGeometry, wheelMaterial, 0.36, 0.19, 0.29, shadowEnabled));
   group.children.slice(-4).forEach((wheel) => {
     wheel.rotation.z = Math.PI / 2;
   });
@@ -153,19 +227,56 @@ function buildCar(material, shadowEnabled) {
 
 function buildCat(material, shadowEnabled) {
   const group = new THREE.Group();
-  group.add(createPart(new THREE.BoxGeometry(0.95, 0.7, 0.68), material, 0, 0.44, 0, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.68, 0.56, 0.55), material, 0, 0.98, 0.04, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.2, 0.24, 0.08), material, -0.18, 1.33, 0.05, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.2, 0.24, 0.08), material, 0.18, 1.33, 0.05, shadowEnabled));
+  const earInnerMaterial = createFeatureMaterial(0xffd0b3);
+  const whiskerMaterial = createFeatureMaterial(0xfefefe, { roughness: 0.3 });
+  const tailMaterial = createFeatureMaterial(0xffa25f);
+  const earGeometry = new THREE.ConeGeometry(0.12, 0.28, 4);
+
+  group.add(createPart(new THREE.BoxGeometry(0.9, 0.6, 0.66), material, 0, 0.36, 0, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.66, 0.5, 0.52), material, 0, 0.84, 0.08, shadowEnabled));
+
+  const earL = createPart(earGeometry, material, -0.19, 1.2, 0.09, shadowEnabled);
+  earL.rotation.z = 0.1;
+  group.add(earL);
+  const earR = createPart(earGeometry, material, 0.19, 1.2, 0.09, shadowEnabled);
+  earR.rotation.z = -0.1;
+  group.add(earR);
+  group.add(createPart(new THREE.ConeGeometry(0.07, 0.18, 4), earInnerMaterial, -0.19, 1.18, 0.14, shadowEnabled));
+  group.add(createPart(new THREE.ConeGeometry(0.07, 0.18, 4), earInnerMaterial, 0.19, 1.18, 0.14, shadowEnabled));
+
+  const tail = createPart(new THREE.CylinderGeometry(0.06, 0.08, 0.52, 6), tailMaterial, 0.34, 0.66, -0.25, shadowEnabled);
+  tail.rotation.x = -0.95;
+  tail.rotation.z = -0.22;
+  group.add(tail);
+
+  group.add(createPart(new THREE.BoxGeometry(0.2, 0.03, 0.03), whiskerMaterial, -0.2, 0.8, 0.35, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.2, 0.03, 0.03), whiskerMaterial, 0.2, 0.8, 0.35, shadowEnabled));
+  addEyes(group, shadowEnabled, { y: 0.89, z: 0.34, spread: 0.14, size: 0.08 });
+  addNose(group, shadowEnabled, { y: 0.77, z: 0.36, size: 0.075, color: 0xff9ba3 });
   return group;
 }
 
 function buildDog(material, shadowEnabled) {
   const group = new THREE.Group();
-  group.add(createPart(new THREE.BoxGeometry(1, 0.7, 0.72), material, 0, 0.44, 0, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.7, 0.58, 0.58), material, 0.02, 0.98, 0.03, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.17, 0.31, 0.1), material, -0.22, 1.2, 0, shadowEnabled));
-  group.add(createPart(new THREE.BoxGeometry(0.17, 0.31, 0.1), material, 0.22, 1.2, 0, shadowEnabled));
+  const earMaterial = createFeatureMaterial(0x9f7853);
+  const muzzleMaterial = createFeatureMaterial(0xead8be);
+  const pawMaterial = createFeatureMaterial(0xe5d0b1);
+
+  group.add(createPart(new THREE.BoxGeometry(0.98, 0.62, 0.74), material, 0, 0.37, 0, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.68, 0.5, 0.58), material, 0.02, 0.84, 0.06, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.33, 0.2, 0.26), muzzleMaterial, 0.02, 0.74, 0.38, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.12, 0.34, 0.1), earMaterial, -0.27, 0.82, 0.06, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.12, 0.34, 0.1), earMaterial, 0.29, 0.82, 0.06, shadowEnabled));
+
+  const tail = createPart(new THREE.ConeGeometry(0.08, 0.36, 5), earMaterial, 0.32, 0.67, -0.35, shadowEnabled);
+  tail.rotation.x = -1.1;
+  tail.rotation.z = -0.12;
+  group.add(tail);
+
+  group.add(createPart(new THREE.BoxGeometry(0.2, 0.16, 0.24), pawMaterial, -0.2, 0.12, 0.24, shadowEnabled));
+  group.add(createPart(new THREE.BoxGeometry(0.2, 0.16, 0.24), pawMaterial, 0.2, 0.12, 0.24, shadowEnabled));
+  addEyes(group, shadowEnabled, { y: 0.88, z: 0.33, spread: 0.15, size: 0.08 });
+  addNose(group, shadowEnabled, { x: 0.02, y: 0.71, z: 0.51, size: 0.09, color: 0x2f2525 });
   return group;
 }
 
