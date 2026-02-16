@@ -47,6 +47,10 @@ export function createUI({ initialSettings, initialCollection, icons }) {
     speech: document.querySelector('#speech-toggle'),
     speechRate: document.querySelector('#speech-rate'),
     zoom: document.querySelector('#zoom-slider'),
+    cameraYaw: document.querySelector('#camera-yaw-slider'),
+    cameraHeight: document.querySelector('#camera-height-slider'),
+    cameraDistance: document.querySelector('#camera-distance-slider'),
+    cameraLookY: document.querySelector('#camera-looky-slider'),
     music: document.querySelector('#music-toggle'),
     musicVolume: document.querySelector('#music-volume'),
     sfx: document.querySelector('#sfx-toggle'),
@@ -165,6 +169,10 @@ export function createUI({ initialSettings, initialCollection, icons }) {
     settingsInputs.speech.checked = Boolean(settings.speech);
     settingsInputs.speechRate.value = settings.speechRate;
     settingsInputs.zoom.value = String(settings.zoom);
+    settingsInputs.cameraYaw.value = String(settings.cameraYaw);
+    settingsInputs.cameraHeight.value = String(settings.cameraHeight);
+    settingsInputs.cameraDistance.value = String(settings.cameraDistance);
+    settingsInputs.cameraLookY.value = String(settings.cameraLookY);
     settingsInputs.music.checked = Boolean(settings.music);
     settingsInputs.musicVolume.value = String(settings.musicVolume);
     settingsInputs.sfx.checked = Boolean(settings.sfx);
@@ -201,6 +209,7 @@ export function createUI({ initialSettings, initialCollection, icons }) {
   bindTap(document.querySelector('#close-settings-x'), () => emit('closeSettings'));
   bindTap(document.querySelector('#close-collection-x'), () => emit('closeCollection'));
   bindTap(document.querySelector('#close-menu-x'), () => emit('closeMenu'));
+  bindTap(document.querySelector('#reset-camera'), () => emit('resetCamera'));
 
   bindTap(document.querySelector('#enable-audio'), () => emit('enableAudio'));
 

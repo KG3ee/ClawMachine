@@ -11,11 +11,33 @@ function clamp(value, min, max) {
 }
 
 export class GameRenderer {
-  constructor(container, { pixelation = true, shadows = false, zoom = 1 } = {}) {
+  constructor(
+    container,
+    {
+      pixelation = true,
+      shadows = false,
+      zoom = 1,
+      cameraYaw = 0,
+      cameraHeight = 8.8,
+      cameraDistance = 14.4,
+      cameraLookY = 2.6
+    } = {}
+  ) {
     this.container = container;
     this.pixelation = Boolean(pixelation);
     this.zoom = zoom;
     this.lowResScale = 0.52;
+
+    this.defaultCameraRig = Object.freeze({
+      yaw: 0,
+      height: 8.8,
+      distance: 14.4,
+      lookY: 2.6
+    });
+    this.cameraYaw = cameraYaw;
+    this.cameraHeight = cameraHeight;
+    this.cameraDistance = cameraDistance;
+    this.cameraLookY = cameraLookY;
 
     this.scene = new THREE.Scene();
     this.scene.fog = new THREE.Fog(0xb7e5ff, 16, 30);
@@ -39,6 +61,12 @@ export class GameRenderer {
 
     this.container.appendChild(this.renderer.domElement);
 
+    this.setCameraRig({
+      yaw: this.cameraYaw,
+      height: this.cameraHeight,
+      distance: this.cameraDistance,
+      lookY: this.cameraLookY
+    });
     this.applyCameraZoom(this.zoom);
 
     this.resize = this.resize.bind(this);
@@ -49,6 +77,41 @@ export class GameRenderer {
   getCappedDpr() {
     const maxDpr = detectIPad() ? 2 : 2;
     return clamp(window.devicePixelRatio || 1, 1, maxDpr);
+  }
+
+  setCameraRig({ yaw, height, distance, lookY } = {}) {
+    if (typeof yaw === 'number' && Number.isFinite(yaw)) {
+      this.cameraYaw = clamp(yaw, -50, 50);
+    }
+    if (typeof height === 'number' && Number.isFinite(height)) {
+      this.cameraHeight = clamp(height, 5.2, 13.5);
+    }
+    if (typeof distance === 'number' && Number.isFinite(distance)) {
+      this.cameraDistance = clamp(distance, 9, 22);
+    }
+    if (typeof lookY === 'number' && Number.isFinite(lookY)) {
+      this.cameraLookY = clamp(lookY, 0.8, 5.4);
+    }
+
+    const yawRad = THREE.MathUtils.degToRad(this.cameraYaw);
+    this.baseCameraPosition.set(Math.sin(yawRad) * this.cameraDistance, this.cameraHeight, Math.cos(yawRad) * this.cameraDistance);
+    this.cameraLookAt.set(0, this.cameraLookY, -0.3);
+    this.applyCameraZoom(this.zoom);
+  }
+
+  getDefaultCameraRig() {
+    return {
+      ...this.defaultCameraRig
+    };
+  }
+
+  getCameraRig() {
+    return {
+      yaw: this.cameraYaw,
+      height: this.cameraHeight,
+      distance: this.cameraDistance,
+      lookY: this.cameraLookY
+    };
   }
 
   applyCameraZoom(zoomValue) {

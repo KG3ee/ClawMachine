@@ -35,7 +35,11 @@ const gameContainer = document.querySelector('#game-container');
 const renderer = new GameRenderer(gameContainer, {
   pixelation: settings.pixelation,
   shadows: settings.shadows,
-  zoom: settings.zoom
+  zoom: settings.zoom,
+  cameraYaw: settings.cameraYaw,
+  cameraHeight: settings.cameraHeight,
+  cameraDistance: settings.cameraDistance,
+  cameraLookY: settings.cameraLookY
 });
 
 const world = createWorld(renderer.scene, { shadows: settings.shadows });
@@ -174,6 +178,18 @@ function applySetting({ key, value }) {
   } else if (key === 'zoom') {
     settings.zoom = Number(value);
     renderer.applyCameraZoom(settings.zoom);
+  } else if (key === 'cameraYaw') {
+    settings.cameraYaw = Number(value);
+    renderer.setCameraRig({ yaw: settings.cameraYaw });
+  } else if (key === 'cameraHeight') {
+    settings.cameraHeight = Number(value);
+    renderer.setCameraRig({ height: settings.cameraHeight });
+  } else if (key === 'cameraDistance') {
+    settings.cameraDistance = Number(value);
+    renderer.setCameraRig({ distance: settings.cameraDistance });
+  } else if (key === 'cameraLookY') {
+    settings.cameraLookY = Number(value);
+    renderer.setCameraRig({ lookY: settings.cameraLookY });
   } else if (key === 'music') {
     settings.music = Boolean(value);
     audio.setMusicEnabled(settings.music);
@@ -460,6 +476,17 @@ ui.on('closeCollection', () => {
 
 ui.on('settingChange', (change) => {
   applySetting(change);
+});
+
+ui.on('resetCamera', () => {
+  const defaults = renderer.getDefaultCameraRig();
+  settings.cameraYaw = defaults.yaw;
+  settings.cameraHeight = defaults.height;
+  settings.cameraDistance = defaults.distance;
+  settings.cameraLookY = defaults.lookY;
+  renderer.setCameraRig(defaults);
+  saveAllSettings();
+  audio.playUiTap();
 });
 
 ui.on('collectionSelect', (toyType) => {
