@@ -9,9 +9,9 @@ export const DEFAULT_SETTINGS = Object.freeze({
   speechRate: 'slow',
   zoom: 1,
   cameraYaw: 0,
-  cameraHeight: 8.8,
-  cameraDistance: 14.4,
-  cameraLookY: 2.6,
+  cameraHeight: 7.4,
+  cameraDistance: 15.2,
+  cameraLookY: 1.8,
   music: true,
   musicVolume: 0.35,
   sfx: true,
@@ -57,10 +57,24 @@ function writeJSON(key, value) {
 
 export function loadSettings() {
   const stored = readJSON(SETTINGS_KEY, {});
-  return {
+  const merged = {
     ...DEFAULT_SETTINGS,
     ...stored
   };
+
+  const usingLegacyDefaults =
+    Number(merged.cameraYaw) === 0 &&
+    Number(merged.cameraHeight) === 8.8 &&
+    Number(merged.cameraDistance) === 14.4 &&
+    Number(merged.cameraLookY) === 2.6;
+
+  if (usingLegacyDefaults) {
+    merged.cameraHeight = DEFAULT_SETTINGS.cameraHeight;
+    merged.cameraDistance = DEFAULT_SETTINGS.cameraDistance;
+    merged.cameraLookY = DEFAULT_SETTINGS.cameraLookY;
+  }
+
+  return merged;
 }
 
 export function saveSettings(settings) {

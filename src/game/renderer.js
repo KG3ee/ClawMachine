@@ -18,9 +18,9 @@ export class GameRenderer {
       shadows = false,
       zoom = 1,
       cameraYaw = 0,
-      cameraHeight = 8.8,
-      cameraDistance = 14.4,
-      cameraLookY = 2.6
+      cameraHeight = 7.4,
+      cameraDistance = 15.2,
+      cameraLookY = 1.8
     } = {}
   ) {
     this.container = container;
@@ -30,9 +30,9 @@ export class GameRenderer {
 
     this.defaultCameraRig = Object.freeze({
       yaw: 0,
-      height: 8.8,
-      distance: 14.4,
-      lookY: 2.6
+      height: 7.4,
+      distance: 15.2,
+      lookY: 1.8
     });
     this.cameraYaw = cameraYaw;
     this.cameraHeight = cameraHeight;
@@ -40,11 +40,11 @@ export class GameRenderer {
     this.cameraLookY = cameraLookY;
 
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.Fog(0xb7e5ff, 16, 30);
+    this.scene.fog = new THREE.Fog(0xb7e5ff, 24, 46);
 
-    this.camera = new THREE.PerspectiveCamera(48, 1, 0.1, 80);
-    this.baseCameraPosition = new THREE.Vector3(0, 8.8, 14.4);
-    this.cameraLookAt = new THREE.Vector3(0, 2.6, -0.3);
+    this.camera = new THREE.PerspectiveCamera(50, 1, 0.1, 80);
+    this.baseCameraPosition = new THREE.Vector3(0, 7.4, 15.2);
+    this.cameraLookAt = new THREE.Vector3(0, 1.8, -0.3);
 
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,

@@ -80,6 +80,7 @@ export function createUI({ initialSettings, initialCollection, icons }) {
 
   let resultTimer = null;
   let captionTimer = null;
+  let captionsEnabled = Boolean(initialSettings.captions);
 
   let controlsEnabled = false;
   let moveRepeatTimer = null;
@@ -279,17 +280,27 @@ export function createUI({ initialSettings, initialCollection, icons }) {
   }
 
   function setCaption(text) {
-    captionBox.textContent = text;
+    const content = String(text || '').trim();
+    captionBox.textContent = content;
     window.clearTimeout(captionTimer);
+
+    if (!captionsEnabled || !content) {
+      captionBox.hidden = true;
+      return;
+    }
+
+    captionBox.hidden = false;
     captionTimer = window.setTimeout(() => {
-      if (captionBox.textContent === text) {
+      if (captionBox.textContent === content) {
         captionBox.textContent = '';
+        captionBox.hidden = true;
       }
     }, 3600);
   }
 
   function setCaptionsVisible(enabled) {
-    captionBox.style.display = enabled ? 'block' : 'none';
+    captionsEnabled = Boolean(enabled);
+    captionBox.hidden = !captionsEnabled || !captionBox.textContent.trim();
   }
 
   function setCollectionPreviewText(text) {

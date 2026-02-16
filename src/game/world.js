@@ -71,7 +71,7 @@ function makeMachineBody() {
   const glassMaterial = new THREE.MeshStandardMaterial({
     color: 0xd3f3ff,
     transparent: true,
-    opacity: 0.42,
+    opacity: 0.27,
     roughness: 0.2,
     metalness: 0.06
   });

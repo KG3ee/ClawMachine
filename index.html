@@ -21,16 +21,20 @@
 
       <div id="learn-prompt" class="prompt" hidden></div>
       <div id="result-banner" class="result" hidden></div>
-      <div id="caption-box" class="caption" aria-live="polite"></div>
+      <div id="caption-box" class="caption" aria-live="polite" hidden></div>
 
       <div id="controls" class="controls" role="group" aria-label="Game controls">
-        <div id="joystick-area" class="joystick-area" aria-label="Move claw joystick" aria-disabled="true">
-          <div class="joystick-ring"></div>
-          <div id="joystick-knob" class="joystick-knob"></div>
+        <div class="left-controls">
+          <div id="joystick-area" class="joystick-area" aria-label="Move claw joystick" aria-disabled="true">
+            <div class="joystick-ring"></div>
+            <div id="joystick-knob" class="joystick-knob"></div>
+          </div>
         </div>
-        <div class="action-stack">
+        <div class="right-controls">
           <button id="drop-btn" class="drop-btn" type="button">Drop Claw</button>
-          <button id="autoplay-btn" class="auto-btn" type="button">Auto Play</button>
+          <div class="action-stack">
+            <button id="autoplay-btn" class="auto-btn" type="button">Auto Play</button>
+          </div>
           <div class="control-hint">PC: WASD or Arrows + Space</div>
         </div>
       </div>
