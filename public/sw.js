@@ -37,7 +37,7 @@ self.addEventListener('activate', (event) => {
 
 function offlineFallbackResponse() {
   return new Response(
-    `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline</title></head><body style="font-family:Verdana,sans-serif;background:#b8e9ff;margin:0;display:grid;place-items:center;height:100vh;"><div style="background:#0f5f94;color:#fff;padding:20px;border-radius:14px;max-width:520px;text-align:center;"><h1>Offline Mode</h1><p>Pixel Claw Fun is offline right now. Reconnect once, then it will stay playable offline.</p></div></body></html>`,
+    `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline</title></head><body style="font-family:Verdana,sans-serif;background:#b8e9ff;margin:0;display:grid;place-items:center;height:100vh;"><div style="background:#0f5f94;color:#fff;padding:20px;border-radius:14px;max-width:520px;text-align:center;"><h1>Offline Mode</h1><p>Phaung Phaung is offline right now. Reconnect once, then it will stay playable offline.</p></div></body></html>`,
     {
       headers: {
         'Content-Type': 'text/html; charset=utf-8'

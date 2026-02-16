@@ -1,4 +1,4 @@
-# Pixel Claw Fun (3D Pixel Claw Machine PWA)
+# Phaung Phaung (3D Pixel Claw Machine PWA)
 
 A touch-first 3D claw machine game for kids ages 4-7, built with Vite + Vanilla JS + Three.js.
 
